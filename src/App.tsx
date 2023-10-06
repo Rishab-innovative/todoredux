@@ -1,20 +1,15 @@
-// App.tsx
-import React from "react";
-import Todo from "./component/Todo";
 import { Provider } from "react-redux";
-import { createStore } from "redux";
-import { todosReducer } from "./reducer/cartReducer";
-
-const store = createStore(todosReducer);
+import {store} from "./redux/store";
+import Todo from "./component/Todo";
+import "react-calendar/dist/Calendar.css";
+import "react-date-picker/dist/DatePicker.css";
+import "react-clock/dist/Clock.css";
+import "react-datetime-picker/dist/DateTimePicker.css";
 
 function App() {
   return (
     <Provider store={store}>
-      <div className="App">
-        <div className="container">
-          <Todo />
-        </div>
-      </div>
+      <Todo />
     </Provider>
   );
 }

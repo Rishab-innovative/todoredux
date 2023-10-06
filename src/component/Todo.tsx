@@ -1,49 +1,57 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Modal } from "react-bootstrap";
 import DateTimePicker from "react-datetime-picker";
+import { useDispatch, useSelector } from "react-redux";
+import { addTodo } from "../redux/todoSlice";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../App.css";
-import moment from "moment";
 import TodoData from "./TodoData";
+import moment from "moment";
 import Nav from "./Nav";
-import { connect } from "react-redux";
-import { addTodo, toggleTodo } from "../action/Actions";
 import { TodoItem, Value } from "./Types";
-import { Dispatch } from "redux";
 
-type TodoProps = {
-  items: TodoItem[];
-  handleCheck: (id: number) => void;
-};
-
-const mapStateToProps = (state: TodoItem[]) => ({
-  items: state,
-});
-
-
-const mapDispatchToProps = {
-  handleCheck: toggleTodo,
-};
-
-const Todo: React.FC<TodoProps> = (props) => {
-  const [items, setItems] = useState<TodoItem[]>([]);
-  const [error, setError] = useState<boolean>(false);
-  const [timeOfTodo, onChange] = useState<Value>(moment().toDate());
+const Todo: React.FC = () => {
   const [modalDisplay, setModalDisplay] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState<string>("");
+  const [timeOfTodo, onChange] = useState<Value>(moment().toDate());
+  const [error, setError] = useState<boolean>(false);
+  const [todoCompleted, setTodoCompleted] = useState<boolean>(false);
+  const dispatch = useDispatch();
+  const [items, setItems] = useState<TodoItem[]>([]);
   const [checkInput, setCheckInput] = useState<boolean>(true);
 
+  const check = useSelector((state: any) => state.todos);
+  console.log(check);
+
   const updateItemColors = () => {
-    const updatedItems = items.map((item) => {
-      if (moment(item.dateTime).isBefore(moment())) {
-        return { ...item, color: "red-dot" };
-      } else {
-        return item;
-      }
-    });
-    setItems(updatedItems);
+    const updatedItems = check.map((item: TodoItem) => ({
+      ...item,
+      color: moment(item.dateTime).isBefore(moment())
+        ? "red-dot"
+        : "purple-dot",
+    }));
+    setItems([...updatedItems]);
   };
 
+  const handleCheck = (id: number) => {
+    const itemToUpdate = items.find((item) => item.id === id);
+    if (itemToUpdate) {
+      setTodoCompleted(!itemToUpdate.completed);
+      const updatedItems = items.map((item) =>
+        item.id === id ? { ...item, completed: !item.completed } : item
+      );
+      setItems(updatedItems);
+      setTodoCompleted(!itemToUpdate.completed);
+    }
+  };
+
+  function calculateItemColor(dateTime: Date): string {
+    return moment(dateTime).isBefore(moment()) ? "red-dot" : "purple-dot";
+  }
+
+  useEffect(() => {
+    updateItemColors();
+  }, [check]);
   const handleDone = () => {
     if (inputValue.trim() === "") {
       setCheckInput(false);
@@ -52,35 +60,36 @@ const Todo: React.FC<TodoProps> = (props) => {
       const currentTime = moment();
 
       if (selectedTime.isAfter(currentTime)) {
-        const newTodoItem: TodoItem = {
-          id: items.length + 1,
-          text: inputValue,
-          dateTime: selectedTime.toDate(),
-          completed: false,
-          color: "purple-dot",
-        };
+        dispatch(
+          addTodo({
+            id: check.length + 1,
+            text: inputValue,
+            dateTime: selectedTime.toDate(),
+            completed: todoCompleted,
+            color: moment(selectedTime).isBefore(moment())
+              ? "red-dot"
+              : "purple-dot",
+          })
+        );
         setModalDisplay(false);
         setCheckInput(true);
-        setItems([...items, newTodoItem]);
         setInputValue("");
         setError(false);
       } else {
-        updateItemColors();
         setError(true);
         setModalDisplay(true);
       }
     }
   };
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
-    updateItemColors();
+    const newInputValue = event.target.value;
+    setInputValue(newInputValue);
   };
 
   return (
     <div className="container">
       <Nav setModalDisplay={setModalDisplay} />
-      {/* <TodoData items={items} handleCheck={props.handleCheck} /> */}
+      <TodoData items={items} handleCheck={handleCheck} />
       <div className="addModal">
         <Modal
           show={modalDisplay}
@@ -110,4 +119,4 @@ const Todo: React.FC<TodoProps> = (props) => {
     </div>
   );
 };
-export default connect(mapStateToProps, mapDispatchToProps)(Todo);
+export default Todo;
