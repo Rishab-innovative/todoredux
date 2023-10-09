@@ -1,9 +1,11 @@
 import { Provider } from "react-redux";
-import {store} from "./redux/store";
+import { store } from "./redux/store";
 import Todo from "./component/Todo";
 import "react-calendar/dist/Calendar.css";
 import "react-date-picker/dist/DatePicker.css";
 import "react-clock/dist/Clock.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
 import "react-datetime-picker/dist/DateTimePicker.css";
 
 function App() {

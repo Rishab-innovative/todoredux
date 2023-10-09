@@ -1,7 +1,7 @@
 import React from "react";
 import { ListGroup, Form } from "react-bootstrap";
 import { CiAlarmOn } from "react-icons/ci";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toggleTodo } from "../redux/todoSlice";
 
 type TodoDataProps = {
@@ -21,7 +21,9 @@ const TodoData: React.FC<TodoDataProps> = ({ items, handleCheck }) => {
                 <Form.Check
                   type="checkbox"
                   label={element.text}
-                  onChange={() => dispatch(toggleTodo(element.id))}
+                  onChange={() => {
+                    dispatch(toggleTodo(element.id));
+                  }}
                 />
                 <span
                   className={element.completed ? "green-dot" : element.color}

@@ -2,11 +2,11 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import moment from "moment";
 
 interface TodoItem {
-  id: number;
-  text: string;
-  dateTime: Date;
-  completed: boolean;
-  color: string;
+  id: Number;
+  text: String;
+  dateTime: any;
+  completed: Boolean;
+  color: String;
 }
 interface TodoState {
   todos: TodoItem[];
@@ -19,18 +19,38 @@ const todoSlice = createSlice({
   initialState,
   reducers: {
     addTodo: (state, action: PayloadAction<TodoItem>) => {
-      state.todos.push(action.payload);
+      let list = [...state.todos];
+      list.push(action.payload);
+      state.todos = [...list];
+      const updatedItems = state.todos.map((item) => ({
+        ...item,
+        color: moment(item.dateTime).isBefore(moment())
+          ? "red-dot"
+          : "purple-dot",
+      }));
+      state.todos = [...updatedItems];
+    },
+    updateItemColors: (state) => {
+      const updatedItems = state.todos.map((item) => ({
+        ...item,
+        color: moment(item.dateTime).isBefore(moment())
+          ? "red-dot"
+          : "purple-dot",
+      }));
+      state.todos = [...updatedItems];
     },
     toggleTodo: (state, action: PayloadAction<number>) => {
-      const todo = state.todos.find((item) => item.id === action.payload);
-      if (todo) {
-        todo.completed = !todo.completed;
-        todo.color = moment(todo.dateTime).isBefore(moment())
-          ? "red-dot"
-          : "purple-dot";
-      }
+      let todoList = state.todos.filter((item) => {
+        if (item.id === action.payload) {
+          item.completed = !item.completed;
+          item.color = moment(item.dateTime).isBefore(moment())
+            ? "red-dot"
+            : "purple-dot";
+        }
+      });
     },
   },
 });
-export const { addTodo, toggleTodo} = todoSlice.actions;
+
+export const { addTodo, toggleTodo, updateItemColors } = todoSlice.actions;
 export default todoSlice.reducer;
