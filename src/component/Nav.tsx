@@ -9,6 +9,7 @@ const Nav: React.FC<NavProps> = ({ setModalDisplay }: NavProps) => {
     <div className="nav">
       <p>Today</p>
       <IoAddCircleOutline onClick={() => setModalDisplay(true)} />
+      
     </div>
   );
 };

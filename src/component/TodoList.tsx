@@ -1,21 +1,17 @@
 import React from "react";
 import { ListGroup, Form } from "react-bootstrap";
 import { CiAlarmOn } from "react-icons/ci";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toggleTodo } from "../redux/todoSlice";
 
-type TodoDataProps = {
-  items: any[];
-  handleCheck: (id: number) => void;
-};
-
-const TodoData: React.FC<TodoDataProps> = ({ items, handleCheck }) => {
+const TodoList: React.FC = () => {
   const dispatch = useDispatch();
+  const todoListData = useSelector((state: any) => state.todos);
   return (
     <div className="todo-wrapper">
       <ListGroup variant="flush">
-        {items &&
-          items?.map((element: any) => (
+        {todoListData &&
+          todoListData?.map((element: any) => (
             <ListGroup.Item key={element.id}>
               <div className="container-box">
                 <Form.Check
@@ -40,4 +36,4 @@ const TodoData: React.FC<TodoDataProps> = ({ items, handleCheck }) => {
   );
 };
 
-export default TodoData;
+export default TodoList;

@@ -4,7 +4,7 @@ import moment from "moment";
 interface TodoItem {
   id: Number;
   text: String;
-  dateTime: any;
+  dateTime: Date;
   completed: Boolean;
   color: String;
 }
@@ -40,7 +40,7 @@ const todoSlice = createSlice({
       state.todos = [...updatedItems];
     },
     toggleTodo: (state, action: PayloadAction<number>) => {
-      let todoList = state.todos.filter((item) => {
+      state.todos.filter((item) => {
         if (item.id === action.payload) {
           item.completed = !item.completed;
           item.color = moment(item.dateTime).isBefore(moment())
@@ -51,6 +51,5 @@ const todoSlice = createSlice({
     },
   },
 });
-
 export const { addTodo, toggleTodo, updateItemColors } = todoSlice.actions;
 export default todoSlice.reducer;

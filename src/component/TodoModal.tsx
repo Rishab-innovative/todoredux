@@ -1,31 +1,61 @@
 import React from "react";
+import { useState } from "react";
 import { Form, Modal } from "react-bootstrap";
 import DateTimePicker from "react-datetime-picker";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
+import { addTodo } from "../redux/todoSlice";
 
 interface TodoModalProps {
   modalDisplay: boolean;
   setModalDisplay: React.Dispatch<React.SetStateAction<boolean>>;
-  taskName: string;
-  handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  timeOfTodo: Date;
-  setTimeOfTodo: React.Dispatch<React.SetStateAction<Date>>;
-  handleDone: () => void;
-  checkInput: boolean;
-  error: boolean;
 }
 
 const TodoModal: React.FC<TodoModalProps> = ({
   modalDisplay,
   setModalDisplay,
-  taskName,
-  handleInputChange,
-  timeOfTodo,
-  setTimeOfTodo,
-  handleDone,
-  checkInput,
-  error,
 }: TodoModalProps) => {
+  const [checkInputOfTodo, setCheckInputOfTodoOfTodo] = useState<boolean>(true);
+  const [timeOfTodo, setTimeOfTodo] = useState<Date>(new Date());
+  const [todoTimeError, setTodoTimeError] = useState<boolean>(false);
+  const [taskName, setTaskName] = useState<string>("");
+  const [todoCompleted, setTodoCompleted] = useState<boolean>(false);
+
+  const dispatch = useDispatch();
+  const todoListData = useSelector((state: any) => state.todos);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTaskName(event.target.value);
+  };
+
+  const handleDone = () => {
+    if (taskName.trim() === "") {
+      setCheckInputOfTodoOfTodo(false);
+    } else {
+      const selectedTime = moment(timeOfTodo as Date);
+      const currentTime = moment();
+      if (selectedTime.isAfter(currentTime)) {
+        const newTodo = {
+          id: todoListData.length + 1,
+          text: taskName,
+          dateTime: selectedTime.toDate(),
+          completed: todoCompleted,
+          color: moment(selectedTime).isBefore(moment())
+            ? "red-dot"
+            : "purple-dot",
+        };
+        dispatch(addTodo(newTodo));
+        setModalDisplay(false);
+        setCheckInputOfTodoOfTodo(true);
+        setTaskName("");
+        setTodoTimeError(false);
+      } else {
+        setTodoTimeError(true);
+        setModalDisplay(true);
+      }
+    }
+  };
+
   return (
     <div className="addModal">
       <Modal
@@ -39,7 +69,7 @@ const TodoModal: React.FC<TodoModalProps> = ({
           </Form.Label>
           <Form.Control
             as="textarea"
-            className={checkInput ? "black-border" : "red-border"}
+            className={checkInputOfTodo ? "black-border" : "red-border"}
             rows={3}
             value={taskName}
             onChange={handleInputChange}
@@ -53,7 +83,9 @@ const TodoModal: React.FC<TodoModalProps> = ({
           />
           <p onClick={handleDone}>Done</p>
         </Modal.Footer>
-        {error ? <p className="error-msg">"DO NOT SELECT PAST TIME"</p> : null}
+        {todoTimeError ? (
+          <p className="error-msg">"DO NOT SELECT PAST TIME"</p>
+        ) : null}
       </Modal>
     </div>
   );
