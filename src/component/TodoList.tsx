@@ -1,10 +1,18 @@
 import React from "react";
 import { ListGroup, Form } from "react-bootstrap";
-import { CiAlarmOn } from "react-icons/ci";
+import { CiAlarmOn, CiTrash, CiEdit } from "react-icons/ci";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleTodo } from "../redux/todoSlice";
+import { toggleTodo, deleteTodo, editTodo } from "../redux/todoSlice";
 
-const TodoList: React.FC = () => {
+interface TodoModalProps {
+  modalDisplay: boolean;
+  setModalDisplay: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const TodoList: React.FC<TodoModalProps> = ({
+  modalDisplay,
+  setModalDisplay,
+}: TodoModalProps) => {
   const dispatch = useDispatch();
   const todoListData = useSelector((state: any) => state.todos);
   return (
@@ -28,6 +36,22 @@ const TodoList: React.FC = () => {
               <div className="display-time">
                 <CiAlarmOn />
                 {element.dateTime.toLocaleString()}
+                <span
+                  onClick={() => {
+                    setModalDisplay(true);
+                    dispatch(editTodo(element));
+                  }}
+                >
+                  <CiEdit />
+                </span>
+
+                <span
+                  onClick={() => {
+                    dispatch(deleteTodo(element.id));
+                  }}
+                >
+                  <CiTrash />
+                </span>
               </div>
             </ListGroup.Item>
           ))}

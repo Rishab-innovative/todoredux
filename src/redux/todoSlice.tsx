@@ -30,14 +30,21 @@ const todoSlice = createSlice({
       }));
       state.todos = [...updatedItems];
     },
-    updateItemColors: (state) => {
-      const updatedItems = state.todos.map((item) => ({
-        ...item,
-        color: moment(item.dateTime).isBefore(moment())
+    editTodo: (state, action: PayloadAction<TodoItem>) => {
+      const editedTodoIndex = state.todos.findIndex(
+        (item) => item.id === action.payload.id
+      );
+      if (editedTodoIndex !== -1) {
+        state.todos[editedTodoIndex] = action.payload;
+        state.todos[editedTodoIndex].color = moment(
+          action.payload.dateTime
+        ).isBefore(moment())
           ? "red-dot"
-          : "purple-dot",
-      }));
-      state.todos = [...updatedItems];
+          : "purple-dot";
+      }
+    },
+    deleteTodo: (state, action: PayloadAction<number>) => {
+      state.todos = state.todos.filter((item) => item.id !== action.payload);
     },
     toggleTodo: (state, action: PayloadAction<number>) => {
       state.todos.filter((item) => {
@@ -51,5 +58,5 @@ const todoSlice = createSlice({
     },
   },
 });
-export const { addTodo, toggleTodo, updateItemColors } = todoSlice.actions;
+export const { addTodo, toggleTodo, deleteTodo, editTodo } = todoSlice.actions;
 export default todoSlice.reducer;

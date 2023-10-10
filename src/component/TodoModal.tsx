@@ -19,6 +19,7 @@ const TodoModal: React.FC<TodoModalProps> = ({
   const [timeOfTodo, setTimeOfTodo] = useState<Date>(new Date());
   const [todoTimeError, setTodoTimeError] = useState<boolean>(false);
   const [taskName, setTaskName] = useState<string>("");
+  const [editedTodo, setEditedTodo] = useState<string>("a");
   const [todoCompleted, setTodoCompleted] = useState<boolean>(false);
 
   const dispatch = useDispatch();
@@ -27,10 +28,10 @@ const TodoModal: React.FC<TodoModalProps> = ({
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTaskName(event.target.value);
   };
-  
-function calculateItemColor(dateTime: Date): string {
-  return moment(dateTime).isBefore(moment()) ? "red-dot" : "purple-dot";
-}
+
+  function calculateItemColor(dateTime: Date): string {
+    return moment(dateTime).isBefore(moment()) ? "red-dot" : "purple-dot";
+  }
 
   const handleDone = () => {
     if (taskName.trim() === "") {
@@ -48,6 +49,7 @@ function calculateItemColor(dateTime: Date): string {
         };
         dispatch(addTodo(newTodo));
         setModalDisplay(false);
+        setEditedTodo(todoListData);
         setCheckInputOfTodoOfTodo(true);
         setTaskName("");
         setTodoTimeError(false);
@@ -57,6 +59,7 @@ function calculateItemColor(dateTime: Date): string {
       }
     }
   };
+  console.log(editedTodo, "textdelhh");
 
   return (
     <div className="addModal">

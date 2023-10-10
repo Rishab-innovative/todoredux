@@ -13,7 +13,8 @@ const Todo: React.FC = () => {
         modalDisplay={modalDisplay}
         setModalDisplay={setModalDisplay}
       />
-      <TodoList />
+      <TodoList  modalDisplay={modalDisplay}
+        setModalDisplay={setModalDisplay}/>
     </div>
   );
 };
