@@ -27,6 +27,10 @@ const TodoModal: React.FC<TodoModalProps> = ({
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTaskName(event.target.value);
   };
+  
+function calculateItemColor(dateTime: Date): string {
+  return moment(dateTime).isBefore(moment()) ? "red-dot" : "purple-dot";
+}
 
   const handleDone = () => {
     if (taskName.trim() === "") {
@@ -40,9 +44,7 @@ const TodoModal: React.FC<TodoModalProps> = ({
           text: taskName,
           dateTime: selectedTime.toDate(),
           completed: todoCompleted,
-          color: moment(selectedTime).isBefore(moment())
-            ? "red-dot"
-            : "purple-dot",
+          color: calculateItemColor(selectedTime.toDate()),
         };
         dispatch(addTodo(newTodo));
         setModalDisplay(false);
