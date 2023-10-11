@@ -4,31 +4,41 @@ import TodoList from "./TodoList";
 import TodoModal from "./TodoModal";
 
 const Todo: React.FC = () => {
-  const [modalDisplay, setModalDisplay] = useState<boolean>(false);
-  const [prevValueOfTodo, setPrevValueOfTodo] = useState<string>("");
-  const [prevIdOfTodo, setPrevidOfTodo] = useState<number>(0);
-  const [prevTimeOfTodo, setPrevTimeOfTodo] = useState<Date>(new Date());
+  const [todoData, setTodoData] = useState({
+    modalDisplay: false,
+    prevValueOfTodo: "",
+    prevIdOfTodo: 0,
+    prevTimeOfTodo: new Date(),
+  });
+
+  const updateTodoData = (newData :any) => {
+    setTodoData((prevData) => ({
+      ...prevData,
+      ...newData,
+    }));
+  };
 
   return (
     <div className="container">
-      <Nav setModalDisplay={setModalDisplay} />
+      <Nav setModalDisplay={() => updateTodoData({ modalDisplay: true })} />
       <TodoModal
-        prevValueOfTodo={prevValueOfTodo}
-        setPrevValueOfTodo={setPrevValueOfTodo}
-        modalDisplay={modalDisplay}
-        setModalDisplay={setModalDisplay}
-        prevIdOfTodo={prevIdOfTodo}
-        setPrevidOfTodo={setPrevidOfTodo}
-        prevTimeOfTodo={prevTimeOfTodo}
-        setPrevTimeOfTodo={setPrevTimeOfTodo}
+        prevValueOfTodo={todoData.prevValueOfTodo}
+        setPrevValueOfTodo={(value) => updateTodoData({ prevValueOfTodo: value })}
+        modalDisplay={todoData.modalDisplay}
+        setModalDisplay={() => updateTodoData({ modalDisplay: false })}
+        prevIdOfTodo={todoData.prevIdOfTodo}
+        setPrevidOfTodo={(id) => updateTodoData({ prevIdOfTodo: id })}
+        prevTimeOfTodo={todoData.prevTimeOfTodo}
+        setPrevTimeOfTodo={(time) => updateTodoData({ prevTimeOfTodo: time })}
       />
       <TodoList
-        setModalDisplay={setModalDisplay}
-        setPrevValueOfTodo={setPrevValueOfTodo}
-        setPrevidOfTodo={setPrevidOfTodo}
-        setPrevTimeOfTodo={setPrevTimeOfTodo}
+        setModalDisplay={() => updateTodoData({ modalDisplay: true })}
+        setPrevValueOfTodo={(value) => updateTodoData({ prevValueOfTodo: value })}
+        setPrevidOfTodo={(id) => updateTodoData({ prevIdOfTodo: id })}
+        setPrevTimeOfTodo={(time) => updateTodoData({ prevTimeOfTodo: time })}
       />
     </div>
   );
 };
+
 export default Todo;
