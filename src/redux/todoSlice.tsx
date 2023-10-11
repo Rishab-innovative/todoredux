@@ -30,19 +30,18 @@ const todoSlice = createSlice({
       }));
       state.todos = [...updatedItems];
     },
-    editTodo: (state, action: PayloadAction<TodoItem>) => {
-      const editedTodoIndex = state.todos.findIndex(
-        (item) => item.id === action.payload.id
-      );
-      if (editedTodoIndex !== -1) {
-        state.todos[editedTodoIndex] = action.payload;
-        state.todos[editedTodoIndex].color = moment(
-          action.payload.dateTime
-        ).isBefore(moment())
-          ? "red-dot"
-          : "purple-dot";
-      }
+    updateTodoList: (state, action: PayloadAction<TodoItem>) => {
+      const { id, text, dateTime, completed } = action.payload;
+      let listOfTodos = [...state.todos];
+      listOfTodos.forEach((item) => {
+        if (item.id === id) {
+          item.text = text;
+          item.dateTime = dateTime;
+          item.completed = completed;
+        }
+      });
     },
+
     deleteTodo: (state, action: PayloadAction<number>) => {
       state.todos = state.todos.filter((item) => item.id !== action.payload);
     },
@@ -58,5 +57,6 @@ const todoSlice = createSlice({
     },
   },
 });
-export const { addTodo, toggleTodo, deleteTodo, editTodo } = todoSlice.actions;
+export const { addTodo, toggleTodo, deleteTodo, updateTodoList } =
+  todoSlice.actions;
 export default todoSlice.reducer;

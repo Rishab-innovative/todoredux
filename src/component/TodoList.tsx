@@ -2,16 +2,20 @@ import React from "react";
 import { ListGroup, Form } from "react-bootstrap";
 import { CiAlarmOn, CiTrash, CiEdit } from "react-icons/ci";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleTodo, deleteTodo, editTodo } from "../redux/todoSlice";
+import { toggleTodo, deleteTodo } from "../redux/todoSlice";
 
 interface TodoModalProps {
-  modalDisplay: boolean;
   setModalDisplay: React.Dispatch<React.SetStateAction<boolean>>;
+  setPrevValueOfTodo: React.Dispatch<React.SetStateAction<string>>;
+  setPrevidOfTodo: React.Dispatch<React.SetStateAction<number>>;
+  setPrevTimeOfTodo: React.Dispatch<React.SetStateAction<Date>>;
 }
 
 const TodoList: React.FC<TodoModalProps> = ({
-  modalDisplay,
   setModalDisplay,
+  setPrevValueOfTodo,
+  setPrevidOfTodo,
+  setPrevTimeOfTodo,
 }: TodoModalProps) => {
   const dispatch = useDispatch();
   const todoListData = useSelector((state: any) => state.todos);
@@ -39,7 +43,9 @@ const TodoList: React.FC<TodoModalProps> = ({
                 <span
                   onClick={() => {
                     setModalDisplay(true);
-                    dispatch(editTodo(element));
+                    setPrevValueOfTodo(element.text);
+                    setPrevidOfTodo(element.id);
+                    setPrevTimeOfTodo(element.dateTime);
                   }}
                 >
                   <CiEdit />
