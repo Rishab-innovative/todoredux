@@ -39,6 +39,7 @@ const todoSlice = createSlice({
           item.dateTime = dateTime;
           item.completed = completed;
         }
+        state.todos = [...listOfTodos];
       });
     },
 

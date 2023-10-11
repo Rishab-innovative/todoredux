@@ -12,9 +12,9 @@ interface TodoModalProps {
   prevValueOfTodo: string;
   setPrevValueOfTodo: React.Dispatch<React.SetStateAction<string>>;
   prevIdOfTodo: number;
+  setPrevTimeOfTodo: React.Dispatch<React.SetStateAction<Date>>;
   setPrevidOfTodo: React.Dispatch<React.SetStateAction<number>>;
   prevTimeOfTodo: Date;
-  setPrevTimeOfTodo: React.Dispatch<React.SetStateAction<Date>>;
 }
 const TodoModal: React.FC<TodoModalProps> = ({
   modalDisplay,
@@ -23,8 +23,8 @@ const TodoModal: React.FC<TodoModalProps> = ({
   setPrevValueOfTodo,
   prevIdOfTodo,
   setPrevidOfTodo,
-  prevTimeOfTodo,
   setPrevTimeOfTodo,
+  prevTimeOfTodo,
 }: TodoModalProps) => {
   const [checkInputOfTodo, setCheckInputOfTodo] = useState<boolean>(true);
   const [timeOfTodo, setTimeOfTodo] = useState<Date>(new Date());
@@ -54,20 +54,29 @@ const TodoModal: React.FC<TodoModalProps> = ({
   }, [modalDisplay, prevValueOfTodo]);
 
   const handleEdit = () => {
-    const selectedTime = moment(timeOfTodo as Date);
-    const updatedTodo = {
-      id: prevIdOfTodo,
-      text: prevValueOfTodo,
-      dateTime: selectedTime.toDate(),
-      completed: todoCompleted,
-      color: calculateItemColor(prevTimeOfTodo),
-    };
-    dispatch(updateTodoList(updatedTodo));
-    setModalDisplay(false);
-    setTodoTimeError(false);
-    setPrevValueOfTodo("");
-    setTimeOfTodo(new Date());
-    setPrevidOfTodo(0);
+    if (prevValueOfTodo.trim() === "") {
+      setCheckInputOfTodo(false);
+    } else {
+      const selectedTime = moment(timeOfTodo as Date);
+      const currentTime = moment();
+      if (selectedTime.isAfter(currentTime)) {
+        const updatedTodo = {
+          id: prevIdOfTodo,
+          text: prevValueOfTodo,
+          dateTime: selectedTime.toDate(),
+          completed: todoCompleted,
+          color: calculateItemColor(prevTimeOfTodo),
+        };
+        dispatch(updateTodoList(updatedTodo));
+        setModalDisplay(false);
+        setTodoTimeError(false);
+        setPrevValueOfTodo("");
+        setTimeOfTodo(new Date());
+        setPrevidOfTodo(0);
+      } else {
+        setTodoTimeError(true);
+      }
+    }
   };
   const handleDone = () => {
     if (taskName.trim() === "" && !checkValueOfTodo) {
@@ -99,6 +108,7 @@ const TodoModal: React.FC<TodoModalProps> = ({
     setModalDisplay(false);
     setCheckInputOfTodo(true);
     setTaskName("");
+    setPrevValueOfTodo("");
     setTimeOfTodo(new Date());
     setTodoTimeError(false);
   };
@@ -124,7 +134,10 @@ const TodoModal: React.FC<TodoModalProps> = ({
         <Modal.Footer className="modalFooter">
           <p onClick={() => handleCancel()}>Cancel</p>
           <DateTimePicker
-            onChange={(value) => setTimeOfTodo(value as Date)}
+            onChange={(value) => {
+              setTimeOfTodo(value as Date);
+              setPrevTimeOfTodo(value as Date);
+            }}
             value={checkValueOfTodo ? prevTimeOfTodo : timeOfTodo}
           />
           {prevIdOfTodo ? (
