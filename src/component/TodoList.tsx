@@ -5,17 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { toggleTodo, deleteTodo } from "../redux/todoSlice";
 
 interface TodoModalProps {
-  setModalDisplay: React.Dispatch<React.SetStateAction<boolean>>;
-  setPrevValueOfTodo: React.Dispatch<React.SetStateAction<string>>;
-  setPrevidOfTodo: React.Dispatch<React.SetStateAction<number>>;
-  setPrevTimeOfTodo: React.Dispatch<React.SetStateAction<Date>>;
+  setTodoData: (data: any) => void;
 }
 
 const TodoList: React.FC<TodoModalProps> = ({
-  setModalDisplay,
-  setPrevValueOfTodo,
-  setPrevidOfTodo,
-  setPrevTimeOfTodo,
+  setTodoData,
 }: TodoModalProps) => {
   const dispatch = useDispatch();
   const todoListData = useSelector((state: any) => state.todos);
@@ -42,10 +36,22 @@ const TodoList: React.FC<TodoModalProps> = ({
                 {element.dateTime.toLocaleString()}
                 <span
                   onClick={() => {
-                    setModalDisplay(true);
-                    setPrevValueOfTodo(element.text);
-                    setPrevidOfTodo(element.id);
-                    setPrevTimeOfTodo(element.dateTime);
+                    setTodoData((prevData: any) => ({
+                      ...prevData,
+                      modalDisplay: true,
+                    }));
+                    setTodoData((prevData: any) => ({
+                      ...prevData,
+                      prevValueOfTodo: (element.text),
+                    }));
+                    setTodoData((prevData: any) => ({
+                      ...prevData,
+                      prevIdOfTodo: (element.id),
+                    }));
+                    setTodoData((prevData: any) => ({
+                      ...prevData,
+                      prevTimeOfTodo: (element.dateTime),
+                    }));
                   }}
                 >
                   <CiEdit />

@@ -6,25 +6,13 @@ import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { addTodo, updateTodoList } from "../redux/todoSlice";
 
-interface TodoModalProps {
-  modalDisplay: boolean;
-  setModalDisplay: React.Dispatch<React.SetStateAction<boolean>>;
-  prevValueOfTodo: string;
-  setPrevValueOfTodo: React.Dispatch<React.SetStateAction<string>>;
-  prevIdOfTodo: number;
-  setPrevTimeOfTodo: React.Dispatch<React.SetStateAction<Date>>;
-  setPrevidOfTodo: React.Dispatch<React.SetStateAction<number>>;
-  prevTimeOfTodo: Date;
-}
+type TodoModalProps = {
+  todoData: any;
+  setTodoData: (data: any) => void;
+};
 const TodoModal: React.FC<TodoModalProps> = ({
-  modalDisplay,
-  setModalDisplay,
-  prevValueOfTodo,
-  setPrevValueOfTodo,
-  prevIdOfTodo,
-  setPrevidOfTodo,
-  setPrevTimeOfTodo,
-  prevTimeOfTodo,
+  todoData,
+  setTodoData,
 }: TodoModalProps) => {
   const [checkInputOfTodo, setCheckInputOfTodo] = useState<boolean>(true);
   const [timeOfTodo, setTimeOfTodo] = useState<Date>(new Date());
@@ -37,42 +25,53 @@ const TodoModal: React.FC<TodoModalProps> = ({
   const todoListData = useSelector((state: any) => state.todos);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    prevIdOfTodo
-      ? setPrevValueOfTodo(event.target.value)
+    todoData.prevIdOfTodo
+      ? setTodoData((prevData: any) => ({
+          ...prevData,
+          prevValueOfTodo: event.target.value,
+        }))
       : setTaskName(event.target.value);
     setCheckInputOfTodo(true);
   };
-
   function calculateItemColor(dateTime: Date): string {
     return moment(dateTime).isBefore(moment()) ? "red-dot" : "purple-dot";
   }
 
   useEffect(() => {
-    if (modalDisplay) {
-      setCheckValueOfTodo(prevValueOfTodo.length > 0);
+    if (todoData.modalDisplay) {
+      setCheckValueOfTodo(todoData.prevValueOfTodo.length > 0);
     }
-  }, [modalDisplay, prevValueOfTodo]);
+  }, [todoData.modalDisplay, todoData.prevValueOfTodo]);
 
   const handleEdit = () => {
-    if (prevValueOfTodo.trim() === "") {
+    if (todoData.prevValueOfTodo.trim() === "") {
       setCheckInputOfTodo(false);
     } else {
       const selectedTime = moment(timeOfTodo as Date);
       const currentTime = moment();
       if (selectedTime.isAfter(currentTime)) {
         const updatedTodo = {
-          id: prevIdOfTodo,
-          text: prevValueOfTodo,
+          id: todoData.prevIdOfTodo,
+          text: todoData.prevValueOfTodo,
           dateTime: selectedTime.toDate(),
           completed: todoCompleted,
-          color: calculateItemColor(prevTimeOfTodo),
+          color: calculateItemColor(todoData.prevTimeOfTodo),
         };
         dispatch(updateTodoList(updatedTodo));
-        setModalDisplay(false);
+        setTodoData((prevData: any) => ({
+          ...prevData,
+          modalDisplay: false,
+        }));
         setTodoTimeError(false);
-        setPrevValueOfTodo("");
+        setTodoData((prevData: any) => ({
+          ...prevData,
+          prevValueOfTodo: "",
+        }));
         setTimeOfTodo(new Date());
-        setPrevidOfTodo(0);
+        setTodoData((prevData: any) => ({
+          ...prevData,
+          prevIdOfTodo: 0,
+        }));
       } else {
         setTodoTimeError(true);
       }
@@ -93,8 +92,14 @@ const TodoModal: React.FC<TodoModalProps> = ({
           color: calculateItemColor(selectedTime.toDate()),
         };
         dispatch(addTodo(newTodo));
-        setModalDisplay(false);
-        setPrevValueOfTodo("");
+        setTodoData((prevData: any) => ({
+          ...prevData,
+          modalDisplay: false,
+        }));
+        setTodoData((prevData: any) => ({
+          ...prevData,
+          prevValueOfTodo: "",
+        }));
         setCheckInputOfTodo(true);
         setTaskName("");
         setTimeOfTodo(new Date());
@@ -105,18 +110,29 @@ const TodoModal: React.FC<TodoModalProps> = ({
     }
   };
   const handleCancel = () => {
-    setModalDisplay(false);
+    setTodoData((prevData: any) => ({
+      ...prevData,
+      modalDisplay: false,
+    }));
     setCheckInputOfTodo(true);
     setTaskName("");
-    setPrevValueOfTodo("");
+    setTodoData((prevData: any) => ({
+      ...prevData,
+      prevValueOfTodo: "",
+    }));
     setTimeOfTodo(new Date());
     setTodoTimeError(false);
   };
   return (
     <div className="addModal">
       <Modal
-        show={modalDisplay}
-        onHide={() => setModalDisplay(false)}
+        show={todoData.modalDisplay}
+        onHide={() =>
+          setTodoData((prevData: any) => ({
+            ...prevData,
+            modalDisplay: false,
+          }))
+        }
         className="modalContainer"
       >
         <Form.Group className="mb-3">
@@ -127,7 +143,7 @@ const TodoModal: React.FC<TodoModalProps> = ({
             as="textarea"
             className={checkInputOfTodo ? "black-border" : "red-border"}
             rows={3}
-            value={checkValueOfTodo ? prevValueOfTodo : taskName}
+            value={checkValueOfTodo ? todoData.prevValueOfTodo : taskName}
             onChange={handleInputChange}
           />
         </Form.Group>
@@ -136,11 +152,14 @@ const TodoModal: React.FC<TodoModalProps> = ({
           <DateTimePicker
             onChange={(value) => {
               setTimeOfTodo(value as Date);
-              setPrevTimeOfTodo(value as Date);
+              setTodoData((prevData: any) => ({
+                ...prevData,
+                prevTimeOfTodo: value as Date,
+              }));
             }}
-            value={checkValueOfTodo ? prevTimeOfTodo : timeOfTodo}
+            value={checkValueOfTodo ? todoData.prevTimeOfTodo : timeOfTodo}
           />
-          {prevIdOfTodo ? (
+          {todoData.prevIdOfTodo ? (
             <p onClick={handleEdit}>Save</p>
           ) : (
             <p onClick={handleDone}>Done</p>
