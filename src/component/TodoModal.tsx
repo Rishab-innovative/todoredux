@@ -14,24 +14,45 @@ const TodoModal: React.FC<TodoModalProps> = ({
   todoData,
   setTodoData,
 }: TodoModalProps) => {
-  const [checkInputOfTodo, setCheckInputOfTodo] = useState<boolean>(true);
-  const [timeOfTodo, setTimeOfTodo] = useState<Date>(new Date());
-  const [todoTimeError, setTodoTimeError] = useState<boolean>(false);
-  const [taskName, setTaskName] = useState<string>("");
-  const [todoCompleted, setTodoCompleted] = useState<boolean>(false);
-  const [checkValueOfTodo, setCheckValueOfTodo] = useState<boolean>();
-
+  const [inputDataOfTodo, setInputDataOfTodo] = useState({
+    validationOfInputField: true,
+    timeOfTodo: new Date(),
+    todoTimeError: false,
+    taskName: "",
+    todoCompleted: false,
+    checkValueOfTodo: false,
+  });
   const dispatch = useDispatch();
   const todoListData = useSelector((state: any) => state.todos);
 
+  useEffect(() => {
+    if (todoData.prevIdOfTodo) {
+      setInputDataOfTodo((prev: any) => ({
+        ...prev,
+        taskName: todoData.prevValueOfTodo,
+        timeOfTodo: todoData.prevTimeOfTodo,
+        validationOfInputField: true,
+      }));
+    }
+  }, [
+    todoData.prevIdOfTodo,
+    todoData.prevValueOfTodo,
+    todoData.prevTimeOfTodo,
+  ]);
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    todoData.prevIdOfTodo
-      ? setTodoData((prevData: any) => ({
-          ...prevData,
-          prevValueOfTodo: event.target.value,
-        }))
-      : setTaskName(event.target.value);
-    setCheckInputOfTodo(true);
+    setInputDataOfTodo((prev: any) => ({
+      ...prev,
+      taskName: event.target.value,
+      validationOfInputField: true,
+    }));
+  };
+  const handleTimeChange = (value: any) => {
+    console.log(value, ":valueod dateINSIDE TIMEFUNC");
+    setInputDataOfTodo((prev: any) => ({
+      ...prev,
+      timeOfTodo: value as Date,
+    }));
   };
   function calculateItemColor(dateTime: Date): string {
     return moment(dateTime).isBefore(moment()) ? "red-dot" : "purple-dot";
@@ -39,100 +60,113 @@ const TodoModal: React.FC<TodoModalProps> = ({
 
   useEffect(() => {
     if (todoData.modalDisplay) {
-      setCheckValueOfTodo(todoData.prevValueOfTodo.length > 0);
+      setInputDataOfTodo((prev: any) => ({
+        ...prev,
+        checkValueOfTodo: todoData.prevValueOfTodo.length > 0,
+      }));
     }
-  }, [todoData.modalDisplay, todoData.prevValueOfTodo]);
+  }, [todoData.modalDisplay, todoData.prevValueOfTodo, todoData.D]);
 
   const handleEdit = () => {
     if (todoData.prevValueOfTodo.trim() === "") {
-      setCheckInputOfTodo(false);
+      setInputDataOfTodo((prev: any) => ({
+        ...prev,
+        validationOfInputField: false,
+      }));
     } else {
-      const selectedTime = moment(timeOfTodo as Date);
+      let selectedTime = moment(inputDataOfTodo.timeOfTodo as Date);
       const currentTime = moment();
-      if (selectedTime.isAfter(currentTime)) {
+      const prevTime = moment(todoData.prevTimeOfTodo);
+      if (selectedTime.isAfter(currentTime) && prevTime.isAfter(currentTime)) {
+        selectedTime = prevTime;
         const updatedTodo = {
           id: todoData.prevIdOfTodo,
-          text: todoData.prevValueOfTodo,
+          text: inputDataOfTodo.taskName,
           dateTime: selectedTime.toDate(),
-          completed: todoCompleted,
+          completed: inputDataOfTodo.todoCompleted,
           color: calculateItemColor(todoData.prevTimeOfTodo),
         };
         dispatch(updateTodoList(updatedTodo));
         setTodoData((prevData: any) => ({
           ...prevData,
+          prevIdOfTodo: 0,
           modalDisplay: false,
         }));
-        setTodoTimeError(false);
-        setTodoData((prevData: any) => ({
-          ...prevData,
-          prevValueOfTodo: "",
-        }));
-        setTimeOfTodo(new Date());
-        setTodoData((prevData: any) => ({
-          ...prevData,
-          prevIdOfTodo: 0,
+        setInputDataOfTodo((prev: any) => ({
+          ...prev,
+          todoTimeError: false,
+          taskName: "",
+          timeOfTodo: new Date(),
         }));
       } else {
-        setTodoTimeError(true);
+        setInputDataOfTodo((prev: any) => ({
+          ...prev,
+          todoTimeError: true,
+        }));
       }
     }
   };
   const handleDone = () => {
-    if (taskName.trim() === "" && !checkValueOfTodo) {
-      setCheckInputOfTodo(false);
+    if (
+      inputDataOfTodo.taskName.trim() === "" &&
+      !inputDataOfTodo.checkValueOfTodo
+    ) {
+      setInputDataOfTodo((prev: any) => ({
+        ...prev,
+        validationOfInputField: false,
+      }));
     } else {
-      const selectedTime = moment(timeOfTodo as Date);
+      const selectedTime = moment(inputDataOfTodo.timeOfTodo as Date);
       const currentTime = moment();
       if (selectedTime.isAfter(currentTime)) {
         const newTodo = {
           id: todoListData.length + 1,
-          text: taskName,
+          text: inputDataOfTodo.taskName,
           dateTime: selectedTime.toDate(),
-          completed: todoCompleted,
+          completed: inputDataOfTodo.todoCompleted,
           color: calculateItemColor(selectedTime.toDate()),
         };
         dispatch(addTodo(newTodo));
         setTodoData((prevData: any) => ({
           ...prevData,
+          prevValueOfTodo: "",
           modalDisplay: false,
         }));
-        setTodoData((prevData: any) => ({
-          ...prevData,
-          prevValueOfTodo: "",
+        setInputDataOfTodo((prev: any) => ({
+          ...prev,
+          validationOfInputField: true,
+          taskName: "",
+          timeOfTodo: new Date(),
+          todoTimeError: false,
         }));
-        setCheckInputOfTodo(true);
-        setTaskName("");
-        setTimeOfTodo(new Date());
-        setTodoTimeError(false);
       } else {
-        setTodoTimeError(true);
+        setInputDataOfTodo((prev: any) => ({
+          ...prev,
+          todoTimeError: true,
+        }));
       }
     }
   };
-  const handleCancel = () => {
+  const resetState = () => {
     setTodoData((prevData: any) => ({
       ...prevData,
       modalDisplay: false,
-    }));
-    setCheckInputOfTodo(true);
-    setTaskName("");
-    setTodoData((prevData: any) => ({
-      ...prevData,
       prevValueOfTodo: "",
     }));
-    setTimeOfTodo(new Date());
-    setTodoTimeError(false);
+    setInputDataOfTodo({
+      validationOfInputField: true,
+      timeOfTodo: new Date(),
+      todoTimeError: false,
+      taskName: "",
+      todoCompleted: false,
+      checkValueOfTodo: false,
+    });
   };
   return (
     <div className="addModal">
       <Modal
         show={todoData.modalDisplay}
-        onHide={() =>
-          setTodoData((prevData: any) => ({
-            ...prevData,
-            modalDisplay: false,
-          }))
-        }
+        onHide={() => resetState()}
         className="modalContainer"
       >
         <Form.Group className="mb-3">
@@ -141,31 +175,29 @@ const TodoModal: React.FC<TodoModalProps> = ({
           </Form.Label>
           <Form.Control
             as="textarea"
-            className={checkInputOfTodo ? "black-border" : "red-border"}
+            className={
+              inputDataOfTodo.validationOfInputField
+                ? "black-border"
+                : "red-border"
+            }
             rows={3}
-            value={checkValueOfTodo ? todoData.prevValueOfTodo : taskName}
+            value={inputDataOfTodo.taskName}
             onChange={handleInputChange}
           />
         </Form.Group>
         <Modal.Footer className="modalFooter">
-          <p onClick={() => handleCancel()}>Cancel</p>
+          <p onClick={() => resetState()}>Cancel</p>
           <DateTimePicker
-            onChange={(value) => {
-              setTimeOfTodo(value as Date);
-              setTodoData((prevData: any) => ({
-                ...prevData,
-                prevTimeOfTodo: value as Date,
-              }));
-            }}
-            value={checkValueOfTodo ? todoData.prevTimeOfTodo : timeOfTodo}
+            onChange={handleTimeChange}
+            value={inputDataOfTodo.timeOfTodo}
           />
           {todoData.prevIdOfTodo ? (
-            <p onClick={handleEdit}>Save</p>
+            <p onClick={handleEdit}>Save Edited Todo</p>
           ) : (
-            <p onClick={handleDone}>Done</p>
+            <p onClick={handleDone}>Save New Todo</p>
           )}
         </Modal.Footer>
-        {todoTimeError ? (
+        {inputDataOfTodo.todoTimeError ? (
           <p className="error-msg">"DO NOT SELECT PAST TIME"</p>
         ) : null}
       </Modal>
